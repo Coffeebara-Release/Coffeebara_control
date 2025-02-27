@@ -8,7 +8,7 @@
  */
 StepperMulti::StepperMulti(int number_of_steps, int motor_pin_1, int motor_pin_2)
 {
-  this->steps_left = 0;	//½ºÅÇÃÊ±âÈ­
+  this->steps_left = 0;	//ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½È­
 
   this->step_number = 0;      // which step the motor is on
   this->speed = 0;        // the motor speed, in revolutions per minute
@@ -40,7 +40,7 @@ StepperMulti::StepperMulti(int number_of_steps, int motor_pin_1, int motor_pin_2
 
 StepperMulti::StepperMulti(int number_of_steps, int motor_pin_1, int motor_pin_2, int motor_pin_3, int motor_pin_4)
 {
-  this->steps_left = 0;	//½ºÅÇÃÊ±âÈ­
+  this->steps_left = 0;	//ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½È­
 
   this->step_number = 0;      // which step the motor is on
   this->speed = 0;        // the motor speed, in revolutions per minute
@@ -85,13 +85,13 @@ void StepperMulti::setStep(int steps_to_move)
   if (steps_to_move > 0) {this->direction = 1;}
   if (steps_to_move < 0) {this->direction = 0;}
   
-  //½ºÅÇÀ» ÁøÇà ÇÑ´Ù.
+  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ñ´ï¿½.
   moveStep();
 }
 
 void StepperMulti::moveStep()
 {
-	//³²Àº ½ºÅÜÀÌ ÀÖ´ÂÁö?
+	//ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ï¿½ï¿½?
 	if(this->steps_left > 0)
 	{
 		// move only if the appropriate delay has passed:
@@ -125,6 +125,21 @@ void StepperMulti::moveStep()
 	}
 }
 
+void StepperMulti::resetMotor()
+{
+  digitalWrite(this->motor_pin_1, LOW);
+  digitalWrite(this->motor_pin_2, LOW);
+  digitalWrite(this->motor_pin_3, LOW);
+  digitalWrite(this->motor_pin_4, LOW);
+}
+
+void StepperMulti::holdMotor()
+{
+  digitalWrite(this->motor_pin_1, HIGH);
+  digitalWrite(this->motor_pin_2, LOW);
+  digitalWrite(this->motor_pin_3, LOW);
+  digitalWrite(this->motor_pin_4, HIGH);
+}
 
 /*
  * Moves the motor forward or backwards.

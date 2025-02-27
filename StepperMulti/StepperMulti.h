@@ -29,6 +29,9 @@ class StepperMulti
 
     // motor stop
     void resetMotor();
+
+    // maintain torque
+    void holdMotor();
     
 	//'loop()'�ȿ��� �� �޼ҵ带 ȣ���ؾ� �Ѵ�.
 	void moveStep();

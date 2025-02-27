@@ -142,20 +142,6 @@ void servo_detach(){
     QUEUE_DOOR.detach();
 }
 
-void horizontal_step_hold(){
-    digitalWrite(24, HIGH);
-    digitalWrite(26, LOW);
-    digitalWrite(28, LOW);
-    digitalWrite(30, HIGH);
-}
-
-void vertical_step_hold(){
-    digitalWrite(25, HIGH);
-    digitalWrite(27, LOW);
-    digitalWrite(29, LOW);
-    digitalWrite(31, HIGH);
-}
-
 void close_door(int src, int dst){
   for(int i = src; i <= dst; i+= 5){
     QUEUE_DOOR.write(i);
@@ -326,7 +312,7 @@ void loop(){
                 case QUEUE_GO:
                     queue_mode = 0;
 
-                    vertical_step_hold();
+                    VERTICAL_STEPPER.holdMotor();
                     close_door(105, 160);
                     CurrentCUP.modifyCupInfo(NextCUP.getCupSize(), NextCUP.getEntranceSize(), NextCUP.getExistHolder());
 
@@ -367,7 +353,7 @@ void loop(){
                       queue_forward();
                     }
                     
-                    vertical_step_hold();
+                    VERTICAL_STEPPER.holdMotor();
                     delay(200);
                     
                     open_door(160, 105);
@@ -473,7 +459,7 @@ void loop(){
         
         case VERTICAL_HOLD_CUP:
             delay(300);
-            vertical_step_hold();
+            VERTICAL_STEPPER.holdMotor();
             
             remove_lid_servo_in();
 
@@ -508,8 +494,8 @@ void loop(){
             break;
 
         case HORIZONTAL_HOLD_HOLDER:
-            horizontal_step_hold();
-            vertical_step_hold();
+            HORIZONTAL_STEPPER.holdMotor();
+            VERTICAL_STEPPER.holdMotor();
 
             delay(500);
             HORIZONTAL_STEPPER_finger.write(HORIZONTAL_STEPPER_finger_holder);
