@@ -82,6 +82,11 @@ const float vertical_pos_remove_holder      = 6;
 const float vertical_pos_holder             = 12;
 const float vertical_pos_cup                = 12;
 
+const int left  = -1;
+const int right = 1;
+const int up    = 1;
+const int down  = -1;
+
 /* horizontal servo motor angle definition */
 const int HORIZONTAL_STEPPER_finger_default = 120;
 const int HORIZONTAL_STEPPER_wrist_default  = 170;

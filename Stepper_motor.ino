@@ -16,7 +16,7 @@ StepperQueue QUEUE_STEPPER(QUEUE_STEPPER_DIR, QUEUE_STEPPER_ENA, QUEUE_STEPPER_P
 CUP CurrentCUP(0, 0, 0);
 CUP NextCUP(0, 0, 0);
 
-HX711 LoadCellScale;
+HX711 LoadCellScale(LOADCELL_DATA_PIN, LOADCELL_CLK_PIN, 128, 18.575, 20);
 
 Servo HORIZONTAL_STEPPER_wrist;
 Servo HORIZONTAL_STEPPER_finger;
@@ -38,21 +38,20 @@ int  cm2step(float cm){
 }
 
 void cleaning_cup(){
-    if(cup_cnt[1] >= small_cnt_threshold || cup_cnt[2] >= regular_cnt_threshold || cup_cnt[3] >= large_cnt_threshold){
-        if(cup_cnt[1] >= small_cnt_threshold){
-          small_cup_servo.write(cleaning_cup_angle);
-          cup_cnt[1] = 0;
-        }
-        if(cup_cnt[2] >= regular_cnt_threshold){
-          regular_cup_servo.write(cleaning_cup_angle);
-          cup_cnt[2] = 0;
-        }
-        if(cup_cnt[3] >= large_cnt_threshold){
-          large_cup_servo.write(cleaning_cup_angle);
-          cup_cnt[3] = 0;
-        }
-        delay(1500);
+    
+    if(cup_cnt[1] >= small_cnt_threshold){
+      small_cup_servo.write(cleaning_cup_angle);
+      cup_cnt[1] = 0;
     }
+    if(cup_cnt[2] >= regular_cnt_threshold){
+      regular_cup_servo.write(cleaning_cup_angle);
+      cup_cnt[2] = 0;
+    }
+    if(cup_cnt[3] >= large_cnt_threshold){
+      large_cup_servo.write(cleaning_cup_angle);
+      cup_cnt[3] = 0;
+    }
+    delay(1500);
 
     small_cup_servo.write(default_cup_angle);
     regular_cup_servo.write(default_cup_angle);
@@ -75,17 +74,10 @@ void wash_post_process(){
 
 void HORIZONTAL_STEPPER_move(){
     int steps = abs(cm2step(current_horizontal_pos - next_horizontal_pos));
+    int dir = (current_horizontal_pos > next_horizontal_pos) ? right : left;
 
-    if(current_horizontal_pos > next_horizontal_pos){
-        for(int i = 0; i < steps; i++){
-            HORIZONTAL_STEPPER.setStep(1);
-            delayMicroseconds(HORIZONTAL_STEPPER_DELAY);
-        }
-    }else{
-        for(int i = 0; i < steps; i++){
-            HORIZONTAL_STEPPER.setStep(-1);
-            delayMicroseconds(HORIZONTAL_STEPPER_DELAY);
-        }
+    for(int i = 0; i < steps; i++){
+        HORIZONTAL_STEPPER.setStep(dir); delayMicroseconds(HORIZONTAL_STEPPER_DELAY);
     }
 
     current_horizontal_pos = next_horizontal_pos;
@@ -93,21 +85,11 @@ void HORIZONTAL_STEPPER_move(){
 
 void VERTICAL_STEPPER_move(){
     int steps = abs(cm2step(current_vertical_pos - next_vertical_pos));
+    steps = (next_vertical_pos == vertical_pos_default) ? steps + 50 : steps;
+    int dir = (current_vertical_pos > next_vertical_pos) ? up : down;
 
-    if(next_vertical_pos == vertical_pos_default){
-        steps = steps + 50;
-    }
-
-    if(current_vertical_pos > next_vertical_pos){ // up
-        for(int i = 0; i < steps; i++){
-            VERTICAL_STEPPER.setStep(1);
-            delayMicroseconds(VERTICAL_STEPPER_DELAY);
-        }
-    }else{ // down
-        for(int i = 0; i < steps; i++){ 
-            VERTICAL_STEPPER.setStep(-1);
-            delayMicroseconds(VERTICAL_STEPPER_DELAY);
-        }
+    for(int i = 0; i < steps; i++){
+        VERTICAL_STEPPER.setStep(dir); delayMicroseconds(VERTICAL_STEPPER_DELAY);
     }
 
     current_vertical_pos = next_vertical_pos;
@@ -179,7 +161,6 @@ void close_door(int src, int dst){
     QUEUE_DOOR.write(i);
     delay(50);
   }
-  
 }
 
 void open_door(int src, int dst){
@@ -247,10 +228,6 @@ void setup(){
 
     pinMode(ECHO_PIN, INPUT);
     pinMode(TRIG_PIN, OUTPUT);
-
-    LoadCellScale.begin(LOADCELL_DATA_PIN, LOADCELL_CLK_PIN);
-    LoadCellScale.set_scale(18.575);                            
-    LoadCellScale.tare(20);
 
     attachInterrupt(digitalPinToInterrupt(RESET_PIN), reset_interrupt, CHANGE);
     attachInterrupt(digitalPinToInterrupt(HORIZONTAL_STEPPER_reset_pin), reset_state_change, RISING);
@@ -573,7 +550,7 @@ void loop(){
             VERTICAL_STEPPER_move();
 
              if(!reset_flag){
-                 main_current_state = HORIZONTAL_WASTE_CUP;
+                main_current_state = HORIZONTAL_WASTE_CUP;
              }
 
             break;
@@ -581,6 +558,7 @@ void loop(){
         case HORIZONTAL_WASTE_CUP:
             HORIZONTAL_STEPPER_finger.write(HORIZONTAL_STEPPER_finger_cup);
             delay(1000);
+
             next_horizontal_pos = horizontal_pos_waste;
             HORIZONTAL_STEPPER_move();
 
