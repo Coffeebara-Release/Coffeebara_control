@@ -14,17 +14,20 @@ class SerialComm:
     def isReady(self):
         _cnt = 0
 
-        while self.serial.readable():
+        if self.serial.readable():
             dots, spaces, _cnt = "." * (_cnt := (_cnt + 1) % 5), " " * (5 - _cnt), _cnt
             sys.stdout.write(f"\rconnecting{dots}{spaces}")  
             sys.stdout.flush()
             time.sleep(0.1)
             
+            try:
+                data = int(self.serial.readline().decode().strip())
+                return (data >> 7) & 0x01 == 1
+            except ValueError:
+                pass
             continue
         
-        sys.stdout.write("connected!\n")  
-        sys.stdout.flush()
-        return True
+        return False
 
     def sendCommand(self, command):
         _ret = self.serial.write(command.to_bytes(1, byteorder='big'))
