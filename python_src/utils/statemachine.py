@@ -2,8 +2,9 @@
 import cv2
 import time
 import sys
+import requests
+
 from serialcomm import SerialComm
-from server
 from detector import Cup, CupDetector 
 from socket
 """
@@ -71,6 +72,19 @@ class StateMachine:
         self.current_state = self.PY_DETECTED
 
     def _wait_for_completion(self):
+        waste_weight = self.serial_comm.readResponse()
+        while waste_weight is None:
+            waste_weight = self.serial_comm.readResponse()
+
+        waste_weight = int(waste_weight.decode()[:-2])
+
+        waste_data = {
+            'deviceId' : 1,
+            'capacity' : waste_weight
+        }
+        server_response = requests.patch(, json=waste_data)
+        print(server_response.status_code)
+        print(server_response.json())
         self.webcam.release()
         
 
